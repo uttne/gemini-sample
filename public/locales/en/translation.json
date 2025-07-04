@@ -1,0 +1,11 @@
+{
+  "appTitle": "JUnit Test Result Viewer",
+  "fileUploadTitle": "Select JUnit XML files",
+  "fileUploadDescription": "XML files up to 10MB",
+  "loadedFilesTitle": "Loaded JUnit Files",
+  "noFilesLoaded": "No files loaded yet.",
+  "deleteButton": "Delete",
+  "language": "Language",
+  "english": "English",
+  "japanese": "Japanese"
+}

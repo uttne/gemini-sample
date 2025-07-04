@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TestResultFile } from '../types';
 import {
   DndContext,
@@ -68,6 +69,7 @@ const SortableItem: React.FC<{ file: TestResultFile; onDelete: (id: string) => v
 };
 
 const LoadedFilesList: React.FC<Props> = ({ files, onDelete, onReorder }) => {
+  const { t } = useTranslation();
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -87,9 +89,9 @@ const LoadedFilesList: React.FC<Props> = ({ files, onDelete, onReorder }) => {
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 className="mb-4 text-xl font-semibold text-gray-800">Loaded JUnit Files</h2>
+      <h2 className="mb-4 text-xl font-semibold text-gray-800">{t('loadedFilesTitle')}</h2>
       {files.length === 0 ? (
-        <p className="text-gray-500">No files loaded yet.</p>
+        <p className="text-gray-500">{t('noFilesLoaded')}</p>
       ) : (
         <DndContext
           sensors={sensors}

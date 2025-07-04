@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TestResultFile, TestSuite, TestCase } from './types';
 import FileUpload from './components/FileUpload';
 import Charts from './components/Charts';
@@ -7,6 +8,7 @@ import ResultsTable from './components/ResultsTable';
 import LoadedFilesList from './components/LoadedFilesList';
 
 function App() {
+  const { t, i18n } = useTranslation();
   const [testResultFiles, setTestResultFiles] = useState<TestResultFile[]>([]);
 
   const handleFiles = async (files: FileList) => {
@@ -66,14 +68,32 @@ function App() {
     setTestResultFiles(newOrder);
   };
 
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">
-              JUnit Test Result Viewer
+              {t('appTitle')}
             </h1>
+            <div className="flex items-center space-x-4">
+              <label htmlFor="language-select" className="text-gray-700">
+                {t('language')}:
+              </label>
+              <select
+                id="language-select"
+                onChange={(e) => changeLanguage(e.target.value)}
+                value={i18n.language}
+                className="rounded-md border border-gray-300 p-2 text-gray-700 focus:border-indigo-500 focus:ring-indigo-500"
+              >
+                <option value="en">{t('english')}</option>
+                <option value="ja">{t('japanese')}</option>
+              </select>
+            </div>
           </div>
         </div>
       </header>

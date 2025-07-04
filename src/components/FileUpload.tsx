@@ -1,11 +1,13 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   onFilesSelected: (files: FileList) => void;
 }
 
 const FileUpload: React.FC<Props> = ({ onFilesSelected }) => {
+  const { t } = useTranslation();
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       onFilesSelected(event.target.files);
@@ -34,7 +36,7 @@ const FileUpload: React.FC<Props> = ({ onFilesSelected }) => {
             htmlFor="xml-upload"
             className="cursor-pointer font-medium text-indigo-600 transition hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
-            Select JUnit XML files
+            {t('fileUploadTitle')}
           </label>
         </p>
         <input
@@ -46,7 +48,7 @@ const FileUpload: React.FC<Props> = ({ onFilesSelected }) => {
           className="sr-only"
         />
         <p className="mt-1 text-xs text-gray-500">
-          XML files up to 10MB
+          {t('fileUploadDescription')}
         </p>
       </div>
     </div>

@@ -1,0 +1,11 @@
+{
+  "appTitle": "JUnit テスト結果ビューア",
+  "fileUploadTitle": "JUnit XML ファイルを選択",
+  "fileUploadDescription": "XML ファイル (最大 10MB)",
+  "loadedFilesTitle": "読み込み済み JUnit ファイル",
+  "noFilesLoaded": "ファイルが読み込まれていません。",
+  "deleteButton": "削除",
+  "language": "言語",
+  "english": "英語",
+  "japanese": "日本語"
+}
