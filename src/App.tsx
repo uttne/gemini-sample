@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TestResultFile, TestSuite, TestCase } from './types';
+import type { TestResultFile, TestSuite, TestCase } from './types';
 import FileUpload from './components/FileUpload';
 import Charts from './components/Charts';
 import SummaryTable from './components/SummaryTable';

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { TestResultFile, TestCase } from '../types';
+import type { TestResultFile, TestCase } from '../types';
 
 interface Props {
   resultFiles: TestResultFile[];
@@ -17,6 +17,14 @@ const ResultsTable: React.FC<Props> = ({ resultFiles }) => {
   const toggleRow = (id: string) => {
     setExpandedRow(expandedRow === id ? null : id);
   };
+
+  const allTestCases = resultFiles.flatMap(file =>
+    file.suite.testcases.map(tc => ({ ...tc, fileName: file.fileName }))
+  );
+
+  const filteredTestCases = selectedFile === 'all' 
+    ? allTestCases 
+    : allTestCases.filter(tc => tc.fileName === selectedFile);
 
   const statusBadge = (status: TestCase['status']) => {
     const baseClasses =
@@ -114,7 +122,7 @@ const ResultsTable: React.FC<Props> = ({ resultFiles }) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {filteredTestCases.map(tc => {
+            {filteredTestCases.map((tc: TestCase & { fileName: string }) => {
               const rowId = `${tc.fileName}-${tc.classname}-${tc.name}`;
               const isExpandable =
                 tc.status === 'failure' || tc.status === 'error';

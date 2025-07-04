@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { TestResultFile } from '../types';
+import type { TestResultFile } from '../types';
 
 interface Props {
   resultFiles: TestResultFile[];

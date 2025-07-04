@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { TestResultFile, ChartData } from '../types';
+import type { TestResultFile, ChartData } from '../types';
 
 interface Props {
   resultFiles: TestResultFile[];
