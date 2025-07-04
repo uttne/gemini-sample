@@ -4,6 +4,7 @@ import FileUpload from './components/FileUpload';
 import Charts from './components/Charts';
 import SummaryTable from './components/SummaryTable';
 import ResultsTable from './components/ResultsTable';
+import LoadedFilesList from './components/LoadedFilesList';
 
 function App() {
   const [testResultFiles, setTestResultFiles] = useState<TestResultFile[]>([]);
@@ -52,9 +53,17 @@ function App() {
         testcases,
       };
 
-      parsedFiles.push({ fileName: file.name, suite });
+      parsedFiles.push({ id: crypto.randomUUID(), fileName: file.name, suite });
     }
-    setTestResultFiles(parsedFiles);
+    setTestResultFiles(prevFiles => [...prevFiles, ...parsedFiles]);
+  };
+
+  const handleDeleteFile = (id: string) => {
+    setTestResultFiles(prevFiles => prevFiles.filter(file => file.id !== id));
+  };
+
+  const handleReorderFiles = (newOrder: TestResultFile[]) => {
+    setTestResultFiles(newOrder);
   };
 
   return (
@@ -72,6 +81,11 @@ function App() {
         <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
           <FileUpload onFilesSelected={handleFiles} />
         </div>
+        {testResultFiles.length > 0 && (
+          <div className="mb-8">
+            <LoadedFilesList files={testResultFiles} onDelete={handleDeleteFile} onReorder={handleReorderFiles} />
+          </div>
+        )}
         {testResultFiles.length > 0 && (
           <div className="space-y-8">
             <Charts resultFiles={testResultFiles} />

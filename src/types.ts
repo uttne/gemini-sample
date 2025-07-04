@@ -18,6 +18,7 @@ export interface TestSuite {
 }
 
 export interface TestResultFile {
+  id: string;
   fileName: string;
   suite: TestSuite;
 }
