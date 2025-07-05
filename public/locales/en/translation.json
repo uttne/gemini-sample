@@ -27,5 +27,8 @@
   "selectTestCase": "Select a test case from the list to view its details.",
   "systemOut": "System Out",
   "systemErr": "System Err",
-  "backToSummary": "Back to Summary"
+  "backToSummary": "Back to Summary",
+  "filter": "Filter",
+  "clearFilters": "Clear Filters",
+  "clearSort": "Clear Sort"
 }

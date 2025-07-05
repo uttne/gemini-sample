@@ -27,5 +27,8 @@
   "selectTestCase": "リストからテストケースを選択して詳細を表示します。",
   "systemOut": "標準出力",
   "systemErr": "標準エラー出力",
-  "backToSummary": "概要に戻る"
+  "backToSummary": "概要に戻る",
+  "filter": "フィルタ",
+  "clearFilters": "フィルタ解除",
+  "clearSort": "ソート解除"
 }

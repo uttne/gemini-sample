@@ -6,13 +6,71 @@ interface Props {
   testFile: TestResultFile;
 }
 
+type SortKey = 'status' | 'name' | 'time';
+type SortDirection = 'asc' | 'desc';
+
 const TestDetailsPage: React.FC<Props> = ({ testFile }) => {
   const { t } = useTranslation();
   const [selectedTestCase, setSelectedTestCase] = useState<TestCase | null>(null);
   const [leftPaneWidth, setLeftPaneWidth] = useState(33); // 初期幅をパーセンテージで設定
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>(null);
+  const [filters, setFilters] = useState<{ status: string; name: string; time: string }>({ // フィルタの状態を追加
+    status: '',
+    name: '',
+    time: '',
+  });
+
   const allTestCases = testFile.suite.flatMap(suite => suite.testcases);
+
+  const filteredTestCases = React.useMemo(() => { // フィルタリングロジックを追加
+    return allTestCases.filter(testcase => {
+      const statusMatch = filters.status === '' || testcase.status.toLowerCase().includes(filters.status.toLowerCase());
+      const nameMatch = filters.name === '' || testcase.name.toLowerCase().includes(filters.name.toLowerCase());
+      const timeMatch = filters.time === '' || testcase.time.toString().includes(filters.time);
+      return statusMatch && nameMatch && timeMatch;
+    });
+  }, [allTestCases, filters]);
+
+  const sortedAndFilteredCases = React.useMemo(() => {
+    const sortableItems = [...filteredTestCases]; // filteredTestCases を使用
+    if (sortConfig !== null) {
+      sortableItems.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [filteredTestCases, sortConfig]); // filteredTestCases に依存
+
+  const requestSort = (key: SortKey) => {
+    let direction: SortDirection = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>, key: keyof typeof filters) => { // フィルタ変更ハンドラを追加
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      [key]: e.target.value,
+    }));
+  };
+
+  const clearAllFilters = () => { // フィルタ一括解除ハンドラを追加
+    setFilters({ status: '', name: '', time: '' });
+  };
+
+  const clearSort = () => { // ソート初期化ハンドラを追加
+    setSortConfig(null);
+  };
 
   // ドラッグイベントハンドラを useCallback でメモ化
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -51,7 +109,7 @@ const TestDetailsPage: React.FC<Props> = ({ testFile }) => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]" ref={containerRef}>
-      <div className="mb-4">
+      <div className="mb-4"> {/* このdivはそのまま残し、戻るボタンを配置 */}
         <button
           onClick={() => window.location.hash = ''}
           className="inline-flex items-center rounded-md border border-transparent bg-gray-600 px-3 py-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
@@ -59,30 +117,89 @@ const TestDetailsPage: React.FC<Props> = ({ testFile }) => {
           {t('backToSummary')}
         </button>
       </div>
-      <div className="flex flex-1 h-full"> {/* h-full を追加 */}
+      <div className="flex flex-1 h-full">
         {/* 左ペイン：テストケース一覧 */}
         <div
-          className="bg-gray-100 p-4 overflow-y-auto border-r border-gray-200 h-full"
+          className="bg-gray-100 p-4 border-r border-gray-200 h-full flex flex-col"
           style={{ width: `${leftPaneWidth}%` }}
         >
           <h2 className="text-xl font-semibold mb-4">{testFile.fileName} {t('testCases')}</h2>
-          <div className="overflow-x-auto"> {/* 横スクロールが必要な場合に備えて追加 */}
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="flex justify-end space-x-2 mb-4"> {/* justify-end と space-x-2 を追加 */}
+            <button
+              onClick={clearAllFilters}
+              className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-3 py-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              {t('clearFilters')}
+            </button>
+            <button
+              onClick={clearSort}
+              className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-3 py-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              {t('clearSort')}
+            </button>
+          </div>
+          <div className="overflow-x-auto flex-1">
+            <table className="min-w-full divide-y divide-gray-200 table-fixed">
+              <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
-                  <th scope="col" className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t('status')}
+                  <th
+                    scope="col"
+                    className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 cursor-pointer"
+                    onClick={() => requestSort('status')}
+                  >
+                    <div className="flex items-center">
+                      {t('status')}
+                      {sortConfig?.key === 'status' ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
+                      <input
+                        type="text"
+                        placeholder={t('filter')}
+                        value={filters.status}
+                        onChange={(e) => handleFilterChange(e, 'status')}
+                        onClick={(e) => e.stopPropagation()} // ソートイベントが発火しないようにする
+                        className="ml-2 p-1 border border-gray-300 rounded-md text-gray-700 text-sm w-24"
+                      />
+                    </div>
                   </th>
-                  <th scope="col" className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t('name')}
+                  <th
+                    scope="col"
+                    className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 cursor-pointer"
+                    onClick={() => requestSort('name')}
+                  >
+                    <div className="flex items-center">
+                      {t('name')}
+                      {sortConfig?.key === 'name' ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
+                      <input
+                        type="text"
+                        placeholder={t('filter')}
+                        value={filters.name}
+                        onChange={(e) => handleFilterChange(e, 'name')}
+                        onClick={(e) => e.stopPropagation()}
+                        className="ml-2 p-1 border border-gray-300 rounded-md text-gray-700 text-sm w-24"
+                      />
+                    </div>
                   </th>
-                  <th scope="col" className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t('time')}
+                  <th
+                    scope="col"
+                    className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500 cursor-pointer"
+                    onClick={() => requestSort('time')}
+                  >
+                    <div className="flex items-center">
+                      {t('time')}
+                      {sortConfig?.key === 'time' ? (sortConfig.direction === 'asc' ? ' ▲' : ' ▼') : ''}
+                      <input
+                        type="text"
+                        placeholder={t('filter')}
+                        value={filters.time}
+                        onChange={(e) => handleFilterChange(e, 'time')}
+                        onClick={(e) => e.stopPropagation()}
+                        className="ml-2 p-1 border border-gray-300 rounded-md text-gray-700 text-sm w-24"
+                      />
+                    </div>
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {allTestCases.map(testcase => (
+                {sortedAndFilteredCases.map((testcase: TestCase) => (
                   <tr
                     key={testcase.id}
                     className={`hover:bg-gray-100 cursor-pointer ${
