@@ -44,7 +44,7 @@ const TestDetailsPage: React.FC<Props> = ({ initialFileId, allFiles }) => {
   }, [allTestCases, filters]);
 
   const sortedAndFilteredCases = React.useMemo(() => {
-    let sortableItems = [...filteredTestCases];
+    const sortableItems = [...filteredTestCases];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
         if (a[sortConfig.key] < b[sortConfig.key]) {
