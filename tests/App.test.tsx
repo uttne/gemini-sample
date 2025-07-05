@@ -14,8 +14,10 @@ vi.mock('react-i18next', () => ({
   I18nextProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-describe('App', () => {
-  it('renders App component', () => {
+describe('App コンポーネント', () => {
+  // App コンポーネントのテストスイート
+  it('App コンポーネントがレンダリングされる', () => {
+    // App コンポーネントが正しくレンダリングされ、タイトルが表示されることを確認
     render(<App />);
     expect(screen.getByText('appTitle')).toBeInTheDocument();
   });

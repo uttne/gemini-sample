@@ -15,14 +15,17 @@ vi.mock('react-i18next', () => ({
   I18nextProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-describe('FileUpload', () => {
-  it('renders correctly with translated texts', () => {
+describe('FileUpload コンポーネント', () => {
+  // FileUpload コンポーネントのテストスイート
+  it('翻訳されたテキストで正しくレンダリングされる', () => {
+    // コンポーネントが翻訳されたテキストで正しくレンダリングされることを確認
     render(<FileUpload onFilesSelected={vi.fn()} />);
     expect(screen.getByText('fileUploadTitle')).toBeInTheDocument();
     expect(screen.getByText('fileUploadDescription')).toBeInTheDocument();
   });
 
-  it('calls onFilesSelected with selected files when files are chosen', () => {
+  it('ファイルが選択されたときに onFilesSelected が呼び出される', () => {
+    // ファイルが選択されたときに onFilesSelected コールバック関数が正しい引数で呼び出されることを確認
     const onFilesSelectedMock = vi.fn();
     render(<FileUpload onFilesSelected={onFilesSelectedMock} />);
 

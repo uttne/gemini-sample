@@ -54,7 +54,8 @@ vi.mock('@dnd-kit/sortable', () => ({
   }),
 }));
 
-describe('LoadedFilesList', () => {
+describe('LoadedFilesList コンポーネント', () => {
+  // LoadedFilesList コンポーネントのテストスイート
   const mockFiles: TestResultFile[] = [
     {
       id: '1',
@@ -84,20 +85,23 @@ describe('LoadedFilesList', () => {
     },
   ];
 
-  it('renders noFilesLoaded message when no files are provided', () => {
+  it('ファイルが提供されない場合、noFilesLoaded メッセージをレンダリングする', () => {
+    // ファイルが一つも読み込まれていない場合に「ファイルがありません」というメッセージが表示されることを確認
     render(<LoadedFilesList files={[]} onDelete={vi.fn()} onReorder={vi.fn()} />);
     expect(screen.getByText('noFilesLoaded')).toBeInTheDocument();
     expect(screen.queryByText('file1.xml')).not.toBeInTheDocument();
   });
 
-  it('renders file names and delete buttons when files are provided', () => {
+  it('ファイルが提供された場合、ファイル名と削除ボタンをレンダリングする', () => {
+    // ファイルが読み込まれた場合に、ファイル名と削除ボタンが表示されることを確認
     render(<LoadedFilesList files={mockFiles} onDelete={vi.fn()} onReorder={vi.fn()} />);
     expect(screen.getByText('file1.xml')).toBeInTheDocument();
     expect(screen.getByText('file2.xml')).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'Delete' }).length).toBe(2);
   });
 
-  it('calls onDelete when delete button is clicked', () => {
+  it('削除ボタンがクリックされたときに onDelete が呼び出される', () => {
+    // 削除ボタンをクリックすると、onDelete コールバック関数が正しい引数で呼び出されることを確認
     const onDeleteMock = vi.fn();
     render(<LoadedFilesList files={mockFiles} onDelete={onDeleteMock} onReorder={vi.fn()} />);
 
@@ -106,7 +110,8 @@ describe('LoadedFilesList', () => {
     expect(onDeleteMock).toHaveBeenCalledWith('1');
   });
 
-  it('calls onReorder when drag ends and order changes', () => {
+  it('ドラッグ終了時に順序が変更された場合、onReorder が呼び出される', () => {
+    // ドラッグアンドドロップでファイルの順序が変更されたときに、onReorder コールバック関数が正しい引数で呼び出されることを確認
     const onReorderMock = vi.fn();
     render(<LoadedFilesList files={mockFiles} onDelete={vi.fn()} onReorder={onReorderMock} />);
 
@@ -121,28 +126,28 @@ describe('LoadedFilesList', () => {
       {
         id: '2',
         fileName: 'file2.xml',
-        suite: {
-          name: 'Suite2',
-          tests: 1,
-          failures: 0,
-          errors: 0,
-          skipped: 0,
-          time: 1,
-          testcases: [],
-        },
+        suite: [{
+        name: 'Suite2',
+        tests: 1,
+        failures: 0,
+        errors: 0,
+        skipped: 0,
+        time: 1,
+        testcases: [],
+      }],
       },
       {
         id: '1',
         fileName: 'file1.xml',
-        suite: {
-          name: 'Suite1',
-          tests: 1,
-          failures: 0,
-          errors: 0,
-          skipped: 0,
-          time: 1,
-          testcases: [],
-        },
+        suite: [{
+        name: 'Suite1',
+        tests: 1,
+        failures: 0,
+        errors: 0,
+        skipped: 0,
+        time: 1,
+        testcases: [],
+      }],
       },
     ]);
   });

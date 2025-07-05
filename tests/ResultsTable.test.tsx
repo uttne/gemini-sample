@@ -3,7 +3,8 @@ import ResultsTable from '../src/components/ResultsTable';
 import { describe, it, expect } from 'vitest';
 import { TestResultFile } from '../src/types';
 
-describe('ResultsTable', () => {
+describe('ResultsTable コンポーネント', () => {
+  // ResultsTable コンポーネントのテストスイート
   const mockResultFiles: TestResultFile[] = [
     {
       id: '1',
@@ -72,14 +73,16 @@ describe('ResultsTable', () => {
     },
   ];
 
-  it('renders without crashing when no data is provided', () => {
+  it('データが提供されない場合でもクラッシュせずにレンダリングされる', () => {
+    // データが空の場合でも、テーブルが正しくレンダリングされることを確認
     render(<ResultsTable resultFiles={[]} />);
     expect(screen.getByText('Test Cases')).toBeInTheDocument();
     expect(screen.getByLabelText('Filter by file:')).toBeInTheDocument();
     expect(screen.getByText('All Files')).toBeInTheDocument();
   });
 
-  it('renders test cases correctly with provided data', () => {
+  it('提供されたデータでテストケースが正しくレンダリングされる', () => {
+    // データが提供された場合に、テストケースがテーブルに正しく表示されることを確認
     render(<ResultsTable resultFiles={mockResultFiles} />);
 
     expect(screen.getByText('testCase1')).toBeInTheDocument();
@@ -94,7 +97,8 @@ describe('ResultsTable', () => {
     expect(screen.getByText('Error')).toBeInTheDocument();
   });
 
-  it('filters test cases by selected file', () => {
+  it('選択されたファイルでテストケースがフィルタリングされる', () => {
+    // ファイル選択ドロップダウンでフィルタリングが正しく機能することを確認
     render(<ResultsTable resultFiles={mockResultFiles} />);
 
     const filterSelect = screen.getByLabelText('Filter by file:');
@@ -115,7 +119,8 @@ describe('ResultsTable', () => {
     expect(screen.getByText('testCaseB')).toBeInTheDocument();
   });
 
-  it('toggles details for failed/error test cases', async () => {
+  it('失敗/エラーテストケースの詳細が表示/非表示される', async () => {
+    // 失敗またはエラーのテストケースをクリックすると詳細が表示され、再度クリックすると非表示になることを確認
     render(<ResultsTable resultFiles={mockResultFiles} />);
 
     // Initially, details should not be visible

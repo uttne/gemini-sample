@@ -27,15 +27,18 @@ vi.mock('recharts', async (importOriginal) => {
   };
 });
 
-describe('Charts', () => {
-  it('renders without crashing when no data is provided', () => {
+describe('Charts コンポーネント', () => {
+  // Charts コンポーネントのテストスイート
+  it('データが提供されない場合でもクラッシュせずにレンダリングされる', () => {
+    // データが空の場合でも、チャートコンポーネントが正しくレンダリングされることを確認
     render(<Charts resultFiles={[]} />);
     expect(screen.getByText('Test Results Trend')).toBeInTheDocument();
     expect(screen.getByText('Test Cases')).toBeInTheDocument();
     expect(screen.getByText('Execution Time (seconds)')).toBeInTheDocument();
   });
 
-  it('renders charts with provided data', () => {
+  it('提供されたデータでチャートがレンダリングされる', () => {
+    // データが提供された場合に、チャートコンポーネントが正しくレンダリングされ、データが表示されることを確認
     const mockResultFiles: TestResultFile[] = [
       {
         id: '1',

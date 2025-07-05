@@ -3,7 +3,8 @@ import SummaryTable from '../src/components/SummaryTable';
 import { describe, it, expect } from 'vitest';
 import { TestResultFile } from '../src/types';
 
-describe('SummaryTable', () => {
+describe('SummaryTable コンポーネント', () => {
+  // SummaryTable コンポーネントのテストスイート
   const mockResultFiles: TestResultFile[] = [
     {
       id: '1',
@@ -33,7 +34,8 @@ describe('SummaryTable', () => {
     },
   ];
 
-  it('renders without crashing when no data is provided', () => {
+  it('データが提供されない場合でもクラッシュせずにレンダリングされる', () => {
+    // データが空の場合でも、サマリーテーブルが正しくレンダリングされることを確認
     render(<SummaryTable resultFiles={[]} />);
     expect(screen.getByText('Summary')).toBeInTheDocument();
     expect(screen.getByText('Total')).toBeInTheDocument();
@@ -41,7 +43,8 @@ describe('SummaryTable', () => {
     expect(screen.getByText('0.000')).toBeInTheDocument(); // Time
   });
 
-  it('renders total and individual file summaries correctly', () => {
+  it('合計と個々のファイルのサマリーが正しくレンダリングされる', () => {
+    // データが提供された場合に、合計行と個々のファイル行が正しくレンダリングされ、値とスタイルが正しいことを確認
     render(<SummaryTable resultFiles={mockResultFiles} />);
 
     // Check total row
