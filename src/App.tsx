@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TestResultFile, TestSuite, TestCase } from './types';
 import FileUpload from './components/FileUpload';
@@ -6,10 +6,23 @@ import Charts from './components/Charts';
 import SummaryTable from './components/SummaryTable';
 import ResultsTable from './components/ResultsTable';
 import LoadedFilesList from './components/LoadedFilesList';
+import TestDetailsPage from './components/TestDetailsPage'; // 新しく追加するコンポーネント
 
 function App() {
   const { t, i18n } = useTranslation();
   const [testResultFiles, setTestResultFiles] = useState<TestResultFile[]>([]);
+  const [currentPath, setCurrentPath] = useState(window.location.hash);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setCurrentPath(window.location.hash);
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
 
   const handleFiles = async (files: FileList) => {
     const parsedFiles: TestResultFile[] = [];
@@ -50,6 +63,8 @@ function App() {
           time: parseFloat(tc.getAttribute('time') || '0'),
           status,
           details,
+          systemOut: tc.getElementsByTagName('system-out')[0]?.textContent ?? undefined, // 追加
+          systemErr: tc.getElementsByTagName('system-err')[0]?.textContent ?? undefined, // 追加
           id: crypto.randomUUID(),
         };
         });
@@ -83,6 +98,36 @@ function App() {
     i18n.changeLanguage(lng);
   };
 
+  const renderContent = () => {
+    if (currentPath.startsWith('#/details/')) {
+      const fileId = currentPath.replace('#/details/', '');
+      const file = testResultFiles.find(f => f.id === fileId);
+      if (file) {
+        return <TestDetailsPage testFile={file} />;
+      }
+      return <p>File not found.</p>; // エラーハンドリング
+    }
+    return (
+      <>
+        <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <FileUpload onFilesSelected={handleFiles} />
+        </div>
+        {testResultFiles.length > 0 && (
+          <div className="mb-8">
+            <LoadedFilesList files={testResultFiles} onDelete={handleDeleteFile} onReorder={handleReorderFiles} />
+          </div>
+        )}
+        {testResultFiles.length > 0 && (
+          <div className="space-y-8">
+            <Charts resultFiles={testResultFiles} />
+            <SummaryTable resultFiles={testResultFiles} />
+            <ResultsTable resultFiles={testResultFiles} />
+          </div>
+        )}
+      </>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
       <header className="bg-white shadow-sm">
@@ -109,21 +154,7 @@ function App() {
         </div>
       </header>
       <main className="container mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <FileUpload onFilesSelected={handleFiles} />
-        </div>
-        {testResultFiles.length > 0 && (
-          <div className="mb-8">
-            <LoadedFilesList files={testResultFiles} onDelete={handleDeleteFile} onReorder={handleReorderFiles} />
-          </div>
-        )}
-        {testResultFiles.length > 0 && (
-          <div className="space-y-8">
-            <Charts resultFiles={testResultFiles} />
-            <SummaryTable resultFiles={testResultFiles} />
-            <ResultsTable resultFiles={testResultFiles} />
-          </div>
-        )}
+        {renderContent()}
       </main>
     </div>
   );

@@ -1,10 +1,11 @@
-
 export interface TestCase {
   name: string;
   classname: string;
   time: number;
   status: 'success' | 'failure' | 'error' | 'skipped';
   details?: string;
+  systemOut?: string; // system-out を追加
+  systemErr?: string; // system-err を追加
   id: string; // Add id to TestCase
 }
 
