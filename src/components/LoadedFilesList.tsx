@@ -99,7 +99,7 @@ const LoadedFilesList: React.FC<Props> = ({ files, onDelete, onReorder }) => {
           onDragEnd={handleDragEnd}
         >
           <SortableContext items={files.map(file => file.id)} strategy={verticalListSortingStrategy}>
-            <ul className="divide-y divide-gray-200">
+            <ul className="divide-y divide-gray-200 max-h-64 overflow-y-auto">
               {files.map((file) => (
                 <SortableItem key={file.id} file={file} onDelete={onDelete} />
               ))}
