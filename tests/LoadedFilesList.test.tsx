@@ -59,7 +59,7 @@ describe('LoadedFilesList', () => {
     {
       id: '1',
       fileName: 'file1.xml',
-      suite: {
+      suite: [{
         name: 'Suite1',
         tests: 1,
         failures: 0,
@@ -67,12 +67,12 @@ describe('LoadedFilesList', () => {
         skipped: 0,
         time: 1,
         testcases: [],
-      },
+      }],
     },
     {
       id: '2',
       fileName: 'file2.xml',
-      suite: {
+      suite: [{
         name: 'Suite2',
         tests: 1,
         failures: 0,
@@ -80,7 +80,7 @@ describe('LoadedFilesList', () => {
         skipped: 0,
         time: 1,
         testcases: [],
-      },
+      }],
     },
   ];
 

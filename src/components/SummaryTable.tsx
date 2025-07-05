@@ -8,11 +8,13 @@ interface Props {
 
 const SummaryTable: React.FC<Props> = ({ resultFiles }) => {
   const total = resultFiles.reduce((acc, file) => {
-    acc.tests += file.suite.tests;
-    acc.failures += file.suite.failures;
-    acc.errors += file.suite.errors;
-    acc.skipped += file.suite.skipped;
-    acc.time += file.suite.time;
+    file.suite.forEach(suite => {
+      acc.tests += suite.tests;
+      acc.failures += suite.failures;
+      acc.errors += suite.errors;
+      acc.skipped += suite.skipped;
+      acc.time += suite.time;
+    });
     return acc;
   }, { tests: 0, failures: 0, errors: 0, skipped: 0, time: 0 });
 
@@ -98,44 +100,52 @@ const SummaryTable: React.FC<Props> = ({ resultFiles }) => {
                 {total.time.toFixed(3)}
               </td>
             </tr>
-            {resultFiles.map(file => (
-              <tr key={file.fileName}>
-                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-800">
-                  {file.fileName}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {file.suite.tests}
-                </td>
-                <td
-                  className={`whitespace-nowrap px-6 py-4 text-sm font-medium ${
-                    file.suite.failures > 0
-                      ? 'text-red-600'
-                      : 'text-gray-500'
-                  }`}
-                >
-                  {file.suite.failures}
-                </td>
-                <td
-                  className={`whitespace-nowrap px-6 py-4 text-sm font-medium ${
-                    file.suite.errors > 0 ? 'text-red-600' : 'text-gray-500'
-                  }`}
-                >
-                  {file.suite.errors}
-                </td>
-                <td
-                  className={`whitespace-nowrap px-6 py-4 text-sm font-medium ${
-                    file.suite.skipped > 0
-                      ? 'text-yellow-600'
-                      : 'text-gray-500'
-                  }`}
-                >
-                  {file.suite.skipped}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                  {file.suite.time.toFixed(3)}
-                </td>
-              </tr>
-            ))}
+            {resultFiles.map(file => {
+              const fileTotalTests = file.suite.reduce((sum, s) => sum + s.tests, 0);
+              const fileTotalFailures = file.suite.reduce((sum, s) => sum + s.failures, 0);
+              const fileTotalErrors = file.suite.reduce((sum, s) => sum + s.errors, 0);
+              const fileTotalSkipped = file.suite.reduce((sum, s) => sum + s.skipped, 0);
+              const fileTotalTime = file.suite.reduce((sum, s) => sum + s.time, 0);
+
+              return (
+                <tr key={file.fileName}>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-800">
+                    {file.fileName}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    {fileTotalTests}
+                  </td>
+                  <td
+                    className={`whitespace-nowrap px-6 py-4 text-sm font-medium ${
+                      fileTotalFailures > 0
+                        ? 'text-red-600'
+                        : 'text-gray-500'
+                    }`}
+                  >
+                    {fileTotalFailures}
+                  </td>
+                  <td
+                    className={`whitespace-nowrap px-6 py-4 text-sm font-medium ${
+                      fileTotalErrors > 0 ? 'text-red-600' : 'text-gray-500'
+                    }`}
+                  >
+                    {fileTotalErrors}
+                  </td>
+                  <td
+                    className={`whitespace-nowrap px-6 py-4 text-sm font-medium ${
+                      fileTotalSkipped > 0
+                        ? 'text-yellow-600'
+                        : 'text-gray-500'
+                    }`}
+                  >
+                    {fileTotalSkipped}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    {fileTotalTime.toFixed(3)}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

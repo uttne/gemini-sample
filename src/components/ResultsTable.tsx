@@ -19,7 +19,7 @@ const ResultsTable: React.FC<Props> = ({ resultFiles }) => {
   };
 
   const allTestCases = resultFiles.flatMap(file =>
-    file.suite.testcases.map(tc => ({ ...tc, fileName: file.fileName }))
+    file.suite.flatMap(suite => suite.testcases.map(tc => ({ ...tc, fileName: file.fileName })))
   );
 
   const filteredTestCases = selectedFile === 'all' 
@@ -122,8 +122,8 @@ const ResultsTable: React.FC<Props> = ({ resultFiles }) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {filteredTestCases.map((tc: TestCase & { fileName: string }) => {
-              const rowId = `${tc.fileName}-${tc.classname}-${tc.name}`;
+            {filteredTestCases.map((tc: TestCase & { fileName: string; id: string }) => {
+              const rowId = `${tc.id}-${tc.classname}-${tc.name}`;
               const isExpandable =
                 tc.status === 'failure' || tc.status === 'error';
               const isExpanded = expandedRow === rowId;

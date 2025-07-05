@@ -5,6 +5,7 @@ export interface TestCase {
   time: number;
   status: 'success' | 'failure' | 'error' | 'skipped';
   details?: string;
+  id: string; // Add id to TestCase
 }
 
 export interface TestSuite {
@@ -20,7 +21,7 @@ export interface TestSuite {
 export interface TestResultFile {
   id: string;
   fileName: string;
-  suite: TestSuite;
+  suite: TestSuite[];
 }
 
 export interface ChartData {

@@ -14,48 +14,59 @@ function App() {
   const handleFiles = async (files: FileList) => {
     const parsedFiles: TestResultFile[] = [];
     for (const file of Array.from(files)) {
+      // Check if a file with the same name already exists
+      if (testResultFiles.some(existingFile => existingFile.fileName === file.name)) {
+        console.warn(`File with name ${file.name} already exists. Skipping.`);
+        continue;
+      }
+
       const text = await file.text();
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(text, "application/xml");
       
-      const testsuiteNode = xmlDoc.getElementsByTagName('testsuite')[0];
-      if (!testsuiteNode) continue;
+      const testsuiteNodes = xmlDoc.getElementsByTagName('testsuite');
+      if (testsuiteNodes.length === 0) continue;
 
-      const testcasesNodes = Array.from(testsuiteNode.getElementsByTagName('testcase'));
-      const testcases: TestCase[] = testcasesNodes.map(tc => {
-        let status: TestCase['status'] = 'success';
-        let details: string | undefined;
+      const suites: TestSuite[] = [];
+      for (const testsuiteNode of Array.from(testsuiteNodes)) {
+        const testcasesNodes = Array.from(testsuiteNode.getElementsByTagName('testcase'));
+        const testcases: TestCase[] = testcasesNodes.map(tc => {
+          let status: TestCase['status'] = 'success';
+          let details: string | undefined;
 
-        if (tc.getElementsByTagName('failure').length > 0) {
-          status = 'failure';
-          details = tc.getElementsByTagName('failure')[0].textContent ?? '';
-        } else if (tc.getElementsByTagName('error').length > 0) {
-          status = 'error';
-          details = tc.getElementsByTagName('error')[0].textContent ?? '';
-        } else if (tc.getElementsByTagName('skipped').length > 0) {
-          status = 'skipped';
-        }
+          if (tc.getElementsByTagName('failure').length > 0) {
+            status = 'failure';
+            details = tc.getElementsByTagName('failure')[0].textContent ?? '';
+          } else if (tc.getElementsByTagName('error').length > 0) {
+            status = 'error';
+            details = tc.getElementsByTagName('error')[0].textContent ?? '';
+          } else if (tc.getElementsByTagName('skipped').length > 0) {
+            status = 'skipped';
+          }
 
-        return {
+          return {
           name: tc.getAttribute('name') || '',
           classname: tc.getAttribute('classname') || '',
           time: parseFloat(tc.getAttribute('time') || '0'),
           status,
           details,
+          id: crypto.randomUUID(),
         };
-      });
+        });
 
-      const suite: TestSuite = {
-        name: testsuiteNode.getAttribute('name') || '',
-        tests: parseInt(testsuiteNode.getAttribute('tests') || '0'),
-        failures: parseInt(testsuiteNode.getAttribute('failures') || '0'),
-        errors: parseInt(testsuiteNode.getAttribute('errors') || '0'),
-        skipped: parseInt(testsuiteNode.getAttribute('skipped') || '0'),
-        time: parseFloat(testsuiteNode.getAttribute('time') || '0'),
-        testcases,
-      };
+        const suite: TestSuite = {
+          name: testsuiteNode.getAttribute('name') || '',
+          tests: parseInt(testsuiteNode.getAttribute('tests') || '0'),
+          failures: parseInt(testsuiteNode.getAttribute('failures') || '0'),
+          errors: parseInt(testsuiteNode.getAttribute('errors') || '0'),
+          skipped: parseInt(testsuiteNode.getAttribute('skipped') || '0'),
+          time: parseFloat(testsuiteNode.getAttribute('time') || '0'),
+          testcases,
+        };
 
-      parsedFiles.push({ id: crypto.randomUUID(), fileName: file.name, suite });
+        suites.push(suite);
+      }
+      parsedFiles.push({ id: crypto.randomUUID(), fileName: file.name, suite: suites });
     }
     setTestResultFiles(prevFiles => [...prevFiles, ...parsedFiles]);
   };

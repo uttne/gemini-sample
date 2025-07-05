@@ -8,7 +8,7 @@ describe('SummaryTable', () => {
     {
       id: '1',
       fileName: 'test1.xml',
-      suite: {
+      suite: [{
         name: 'Suite1',
         tests: 10,
         failures: 1,
@@ -16,12 +16,12 @@ describe('SummaryTable', () => {
         skipped: 2,
         time: 1.23,
         testcases: [],
-      },
+      }],
     },
     {
       id: '2',
       fileName: 'test2.xml',
-      suite: {
+      suite: [{
         name: 'Suite2',
         tests: 5,
         failures: 0,
@@ -29,7 +29,7 @@ describe('SummaryTable', () => {
         skipped: 0,
         time: 0.5,
         testcases: [],
-      },
+      }],
     },
   ];
 

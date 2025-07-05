@@ -9,16 +9,21 @@ interface Props {
 
 const Charts: React.FC<Props> = ({ resultFiles }) => {
   const chartData: ChartData[] = resultFiles.map(file => {
-    const suite = file.suite;
-    const success = suite.tests - suite.failures - suite.errors - suite.skipped;
+    const totalTests = file.suite.reduce((sum, s) => sum + s.tests, 0);
+    const totalFailures = file.suite.reduce((sum, s) => sum + s.failures, 0);
+    const totalErrors = file.suite.reduce((sum, s) => sum + s.errors, 0);
+    const totalSkipped = file.suite.reduce((sum, s) => sum + s.skipped, 0);
+    const totalTime = file.suite.reduce((sum, s) => sum + s.time, 0);
+    const success = totalTests - totalFailures - totalErrors - totalSkipped;
+
     return {
       name: file.fileName,
-      tests: suite.tests,
+      tests: totalTests,
       success: success,
-      failures: suite.failures,
-      errors: suite.errors,
-      skipped: suite.skipped,
-      time: suite.time,
+      failures: totalFailures,
+      errors: totalErrors,
+      skipped: totalSkipped,
+      time: totalTime,
     };
   });
 

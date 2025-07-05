@@ -8,7 +8,7 @@ describe('ResultsTable', () => {
     {
       id: '1',
       fileName: 'test1.xml',
-      suite: {
+      suite: [{
         name: 'Suite1',
         tests: 3,
         failures: 1,
@@ -21,6 +21,7 @@ describe('ResultsTable', () => {
             classname: 'com.example.TestClass1',
             time: 0.5,
             status: 'success',
+            id: 'tc1',
           },
           {
             name: 'testCase2',
@@ -28,20 +29,22 @@ describe('ResultsTable', () => {
             time: 0.7,
             status: 'failure',
             details: 'Assertion failed: expected true to be false',
+            id: 'tc2',
           },
           {
             name: 'testCase3',
             classname: 'com.example.TestClass1',
             time: 0.3,
             status: 'skipped',
+            id: 'tc3',
           },
         ],
-      },
+      }],
     },
     {
       id: '2',
       fileName: 'test2.xml',
-      suite: {
+      suite: [{
         name: 'Suite2',
         tests: 2,
         failures: 0,
@@ -54,6 +57,7 @@ describe('ResultsTable', () => {
             classname: 'com.example.TestClassA',
             time: 0.4,
             status: 'success',
+            id: 'tcA',
           },
           {
             name: 'testCaseB',
@@ -61,9 +65,10 @@ describe('ResultsTable', () => {
             time: 0.4,
             status: 'error',
             details: 'NullPointerException',
+            id: 'tcB',
           },
         ],
-      },
+      }],
     },
   ];
 
