@@ -1,30 +1,40 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'; // useCallback を追加
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import type { TestResultFile, TestCase } from '../types';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
-  testFile: TestResultFile;
+  initialFileId: string; // 初期表示するファイルのID
+  allFiles: TestResultFile[]; // すべての読み込み済みファイル
 }
 
 type SortKey = 'status' | 'name' | 'time';
 type SortDirection = 'asc' | 'desc';
 
-const TestDetailsPage: React.FC<Props> = ({ testFile }) => {
+const TestDetailsPage: React.FC<Props> = ({ initialFileId, allFiles }) => {
   const { t } = useTranslation();
+  const [selectedFileId, setSelectedFileId] = useState<string>(initialFileId);
   const [selectedTestCase, setSelectedTestCase] = useState<TestCase | null>(null);
   const [leftPaneWidth, setLeftPaneWidth] = useState(33); // 初期幅をパーセンテージで設定
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>(null);
-  const [filters, setFilters] = useState<{ status: string; name: string; time: string }>({ // フィルタの状態を追加
+  const [filters, setFilters] = useState<{ status: string; name: string; time: string }>({
     status: '',
     name: '',
     time: '',
   });
 
-  const allTestCases = testFile.suite.flatMap(suite => suite.testcases);
+  // 現在選択されているファイルを見つける
+  const currentTestFile = React.useMemo(() => {
+    return allFiles.find(file => file.id === selectedFileId);
+  }, [selectedFileId, allFiles]);
 
-  const filteredTestCases = React.useMemo(() => { // フィルタリングロジックを追加
+  // 選択されたファイルのテストケースをフラット化
+  const allTestCases = React.useMemo(() => {
+    return currentTestFile ? currentTestFile.suite.flatMap(suite => suite.testcases) : [];
+  }, [currentTestFile]);
+
+  const filteredTestCases = React.useMemo(() => {
     return allTestCases.filter(testcase => {
       const statusMatch = filters.status === '' || testcase.status.toLowerCase().includes(filters.status.toLowerCase());
       const nameMatch = filters.name === '' || testcase.name.toLowerCase().includes(filters.name.toLowerCase());
@@ -34,7 +44,7 @@ const TestDetailsPage: React.FC<Props> = ({ testFile }) => {
   }, [allTestCases, filters]);
 
   const sortedAndFilteredCases = React.useMemo(() => {
-    const sortableItems = [...filteredTestCases]; // filteredTestCases を使用
+    let sortableItems = [...filteredTestCases];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
         if (a[sortConfig.key] < b[sortConfig.key]) {
@@ -47,7 +57,7 @@ const TestDetailsPage: React.FC<Props> = ({ testFile }) => {
       });
     }
     return sortableItems;
-  }, [filteredTestCases, sortConfig]); // filteredTestCases に依存
+  }, [filteredTestCases, sortConfig]);
 
   const requestSort = (key: SortKey) => {
     let direction: SortDirection = 'asc';
@@ -57,19 +67,26 @@ const TestDetailsPage: React.FC<Props> = ({ testFile }) => {
     setSortConfig({ key, direction });
   };
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>, key: keyof typeof filters) => { // フィルタ変更ハンドラを追加
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>, key: keyof typeof filters) => {
     setFilters(prevFilters => ({
       ...prevFilters,
       [key]: e.target.value,
     }));
   };
 
-  const clearAllFilters = () => { // フィルタ一括解除ハンドラを追加
-    setFilters({ status: '', name: '', time: '' });
+  const clearAllFilters = () => {
+    setFilters({ status: '', name: '', time: '', });
   };
 
-  const clearSort = () => { // ソート初期化ハンドラを追加
+  const clearSort = () => {
     setSortConfig(null);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newFileId = e.target.value;
+    setSelectedFileId(newFileId);
+    window.location.hash = `#/details/${newFileId}`;
+    setSelectedTestCase(null); // ファイル切り替え時に選択中のテストケースをリセット
   };
 
   // ドラッグイベントハンドラを useCallback でメモ化
@@ -84,20 +101,20 @@ const TestDetailsPage: React.FC<Props> = ({ testFile }) => {
     if (newWidth > 90) newWidth = 90; // 最大90%
 
     setLeftPaneWidth(newWidth);
-  }, []); // 依存配列は空でOK、setLeftPaneWidthは安定
+  }, []);
 
   const handleMouseUp = useCallback(() => {
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
     document.body.style.cursor = 'default'; // カーソルを元に戻す
-  }, [handleMouseMove]); // handleMouseMove に依存
+  }, [handleMouseMove]);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => { // React.MouseEvent に戻す
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault(); // ドラッグ中のテキスト選択を防ぐ
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
     document.body.style.cursor = 'ew-resize'; // カーソルをリサイズ用に変更
-  }, [handleMouseMove, handleMouseUp]); // handleMouseMove と handleMouseUp に依存
+  }, [handleMouseMove, handleMouseUp]);
 
   // useEffect はクリーンアップのみに使う
   useEffect(() => {
@@ -105,17 +122,36 @@ const TestDetailsPage: React.FC<Props> = ({ testFile }) => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [handleMouseMove, handleMouseUp]); // クリーンアップ関数も依存する関数に依存
+  }, [handleMouseMove, handleMouseUp]);
+
+  if (!currentTestFile) {
+    return <p>{t('fileNotFound')}</p>; // ファイルが見つからない場合
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]" ref={containerRef}>
-      <div className="mb-4"> {/* このdivはそのまま残し、戻るボタンを配置 */}
+      <div className="mb-4 flex items-center space-x-4">
         <button
           onClick={() => window.location.hash = ''}
           className="inline-flex items-center rounded-md border border-transparent bg-gray-600 px-3 py-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
         >
           {t('backToSummary')}
         </button>
+        <label htmlFor="file-select" className="text-gray-700">
+          {t('selectFile')}:
+        </label>
+        <select
+          id="file-select"
+          onChange={handleFileChange}
+          value={selectedFileId}
+          className="rounded-md border border-gray-300 p-2 text-gray-700 focus:border-indigo-500 focus:ring-indigo-500"
+        >
+          {allFiles.map(file => (
+            <option key={file.id} value={file.id}>
+              {file.fileName}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="flex flex-1 h-full">
         {/* 左ペイン：テストケース一覧 */}
@@ -123,20 +159,22 @@ const TestDetailsPage: React.FC<Props> = ({ testFile }) => {
           className="bg-gray-100 p-4 border-r border-gray-200 h-full flex flex-col"
           style={{ width: `${leftPaneWidth}%` }}
         >
-          <h2 className="text-xl font-semibold mb-4">{testFile.fileName} {t('testCases')}</h2>
-          <div className="flex justify-end space-x-2 mb-4"> {/* justify-end と space-x-2 を追加 */}
-            <button
-              onClick={clearAllFilters}
-              className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-3 py-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              {t('clearFilters')}
-            </button>
-            <button
-              onClick={clearSort}
-              className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-3 py-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              {t('clearSort')}
-            </button>
+          <div className="flex justify-between items-center mb-4"> {/* h2 とボタンを同じ行に配置 */}
+            <h2 className="text-xl font-semibold">{t('testCases')}</h2> {/* ファイル名を削除 */}
+            <div className="flex space-x-2">
+              <button
+                onClick={clearAllFilters}
+                className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-3 py-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                {t('clearFilters')}
+              </button>
+              <button
+                onClick={clearSort}
+                className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-3 py-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                {t('clearSort')}
+              </button>
+            </div>
           </div>
           <div className="overflow-x-auto flex-1">
             <table className="min-w-full divide-y divide-gray-200 table-fixed">

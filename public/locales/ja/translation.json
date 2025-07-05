@@ -30,5 +30,7 @@
   "backToSummary": "概要に戻る",
   "filter": "フィルタ",
   "clearFilters": "フィルタ解除",
-  "clearSort": "ソート解除"
+  "clearSort": "ソート解除",
+  "selectFile": "ファイル選択",
+  "fileNotFound": "ファイルが見つかりません。"
 }

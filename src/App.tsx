@@ -4,9 +4,9 @@ import type { TestResultFile, TestSuite, TestCase } from './types';
 import FileUpload from './components/FileUpload';
 import Charts from './components/Charts';
 import SummaryTable from './components/SummaryTable';
-import ResultsTable from './components/ResultsTable';
+// import ResultsTable from './components/ResultsTable'; // 削除
 import LoadedFilesList from './components/LoadedFilesList';
-import TestDetailsPage from './components/TestDetailsPage'; // 新しく追加するコンポーネント
+import TestDetailsPage from './components/TestDetailsPage';
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -63,8 +63,8 @@ function App() {
           time: parseFloat(tc.getAttribute('time') || '0'),
           status,
           details,
-          systemOut: tc.getElementsByTagName('system-out')[0]?.textContent ?? undefined, // 追加
-          systemErr: tc.getElementsByTagName('system-err')[0]?.textContent ?? undefined, // 追加
+          systemOut: tc.getElementsByTagName('system-out')[0]?.textContent ?? undefined,
+          systemErr: tc.getElementsByTagName('system-err')[0]?.textContent ?? undefined,
           id: crypto.randomUUID(),
         };
         });
@@ -101,11 +101,8 @@ function App() {
   const renderContent = () => {
     if (currentPath.startsWith('#/details/')) {
       const fileId = currentPath.replace('#/details/', '');
-      const file = testResultFiles.find(f => f.id === fileId);
-      if (file) {
-        return <TestDetailsPage testFile={file} />;
-      }
-      return <p>File not found.</p>; // エラーハンドリング
+      // TestDetailsPage に testResultFiles 全体を渡す
+      return <TestDetailsPage initialFileId={fileId} allFiles={testResultFiles} />;
     }
     return (
       <>
@@ -121,7 +118,7 @@ function App() {
           <div className="space-y-8">
             <Charts resultFiles={testResultFiles} />
             <SummaryTable resultFiles={testResultFiles} />
-            <ResultsTable resultFiles={testResultFiles} />
+            {/* <ResultsTable resultFiles={testResultFiles} /> */} {/* 削除 */}
           </div>
         )}
       </>

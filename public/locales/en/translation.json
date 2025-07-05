@@ -30,5 +30,6 @@
   "backToSummary": "Back to Summary",
   "filter": "Filter",
   "clearFilters": "Clear Filters",
-  "clearSort": "Clear Sort"
+  "clearSort": "Clear Sort",
+  "selectFile": "Select File"
 }
